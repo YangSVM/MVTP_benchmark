@@ -50,7 +50,7 @@ g_kin = [g_kin, y(:, 2:end) - (y(:, 1:end-1) + tf/nfe * v(:, 1:end-1).*sin(theta
 g_kin = [g_kin, v(:, 2:end) - (v(:, 1:end-1) + tf/nfe * a(:, 1:end-1))];
 g_kin = [g_kin, phi(:, 2:end) - (phi(:, 1:end-1) + tf/nfe * omega(:, 1:end-1))];
 g_kin = [g_kin, theta(:, 2:end) - (theta(:, 1:end-1) + tf/nfe * v(:, 1:end-1) .* tan(phi(:, 1:end-1)) / VehicleParams.Lw)];
-g_kin = g_kin(:);
+g_kin = g_kin.reshape(-1,1);
 
 % disc constraints
 g_v2v = [];
@@ -67,7 +67,7 @@ if size(v2v_idx, 1) > 0
     g_v2v = [g_v2v, ...
         (xr(v2v_idx(:, 1)) - xf(v2v_idx(:, 2))) .^ 2 + ...
         (yr(v2v_idx(:, 1)) - yf(v2v_idx(:, 2))) .^ 2 - (2 * radius) ^ 2];
-    g_v2v = g_v2v(:);
+    g_v2v = g_v2v.reshape(-1,1);
 end
 
 g_v2o = [];
@@ -82,7 +82,7 @@ if size(v2o_idx, 1) > 0
     g_v2o = [g_v2o, ...
         (xri(:) - obstacles(v2o_idx(:, 2), 1)) .^ 2 + ...
         (yri(:) - obstacles(v2o_idx(:, 2), 2)) .^ 2 - (radius + obstacles(v2o_idx(:, 2), 3)) .^ 2];
-    g_v2o = g_v2o(:);
+    g_v2o = g_v2o.reshape(-1,1);
 end
 
 [xf0, yf0, xr0, yr0] = GetDiscPositions(guesses(idx, :, 1), guesses(idx, :, 2), guesses(idx, :, 3));
@@ -116,7 +116,7 @@ b_phi(:, [1 end], :) = 0.0;
 b_omega(:, [1 end], :) = 0.0;
 
 g_bctheta = [sin(theta(:, end)) - sin(profiles(idx, 6)) cos(theta(:, end)) - cos(profiles(idx, 6))];
-g_bctheta = g_bctheta(:);
+g_bctheta = g_bctheta.reshape(-1,1);
 
 for ii = 1:nvg
     b_x(ii, 1, :) = profiles(idx(ii), 1);
@@ -134,7 +134,7 @@ lbx = opti_lbx(:);
 opti_ubx = cat(3, b_x(:, :, 2), b_y(:, :, 2), b_theta(:, :, 2), b_v(:, :, 2), b_phi(:, :, 2), b_a(:, :, 2), b_omega(:, :, 2));
 ubx = opti_ubx(:);
  
-opti_g = [g_kin; g_bctheta; g_tr(:); g_v2v; g_v2o];
+opti_g = [g_kin; g_bctheta; g_tr.reshape(-1,1); g_v2v; g_v2o];
 lbg = [zeros(size(g_kin)); zeros(size(g_bctheta)); lb_tr(:); zeros(size(g_v2v)); zeros(size(g_v2o))];
 ubg = [zeros(size(g_kin)); zeros(size(g_bctheta)); ub_tr(:); 1e20 * ones(size(g_v2v)); 1e20 * ones(size(g_v2o))];
  

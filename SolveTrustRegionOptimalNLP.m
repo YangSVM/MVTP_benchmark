@@ -12,11 +12,12 @@ nfe = Params.nfe;
 radius = VehicleParams.radius;
 
 tf = MX.sym('tf');
-b_tf = [0.1, Params.tf_max];
+b_tf = [0.1, Params.tf_max];		% boundary of tf
 
 x = MX.sym('x', nv, nfe);
 y = MX.sym('y', nv, nfe);
 theta = MX.sym('theta', nv, nfe);
+% 在第三维度串联。x: [nv, nfe], b_x:[nv, nfe, 2].最后一维代表边界值
 b_x = cat(3, Params.x_min * ones(nv, nfe), Params.x_max * ones(nv, nfe));
 b_y = cat(3, Params.y_min * ones(nv, nfe), Params.y_max * ones(nv, nfe));
 b_theta = cat(3, -inf * ones(nv, nfe), inf * ones(nv, nfe));
